@@ -1,0 +1,28 @@
+{
+  "name": "a11-server",
+  "version": "1.0.0",
+  "description": "this is for the requirement for assignement 11. it is for server that will run on express, cors with mongodb",
+  "keywords": [
+    "assignement11",
+    "A11",
+    "a11",
+    "express",
+    "cors",
+    "mongodb",
+    "JWT",
+    "axios"
+  ],
+  "license": "ISC",
+  "author": "Mohammad Nurun Nabi",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "mongodb": "^6.16.0"
+  }
+}

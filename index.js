@@ -23,5 +23,5 @@ app.get("/", (req, res)=>{
 
 });
 app.listen(port, ()=>{
-    console.log(`app is listening to port${port}`);
+    console.log(`app is listening to port ${port}`);
 })

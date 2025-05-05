@@ -1,14 +1,20 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5001;
 
 const app = express();
 
 // adding middleware
-app.use(cors());
+app.use(cors({
+  origin:["http://localhost:5173"],
+  credentials: true
+}));
 app.use(express.json());
+app.use(cookieParser());
 
 
 /* 
@@ -38,15 +44,62 @@ async function run() {
 
     const database = client.db("hikmahBlog");
     const blogCollection = database.collection("blogs");
-    const blog = {
-        title: "this is the bloggers blog",
-        postedIn: new Date()
-    }
-    const result = await blogCollection.insertOne(blog);
-    console.log(result);
+    const wishlistCollection = database.collection("wishList");
+    const userCollection = database.collection("users");
+
+    // Auth related APIs
+    app.post("/jwt", async(req, res)=>{
+      const user = req.body;
+      const token = jwt.sign(user, process.env.SECRET_JWT, {expiresIn: "1hr"});
+      res
+      .cookie("jwtToken", token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "none",
+
+      })
+      .send(token);
+
+    })
+
+    // get APIs
+
+
+
+    /* ************************************** */
+    /* ********** POST APIs */
+    /* ************************************** */
+
+    // Add blog API
+    app.post("/addBlog", async(req, res)=>{
+      const newBlog = req.body;
+      const result = await blogCollection.insertOne(newBlog);
+      console.log(result);
+      res.send(result);
+    });
+
+    
+    
+    // Add User API
+    app.post("/user", async(req, res)=>{
+      const user = req.body;
+      const result = await userCollection.insertOne(user);
+      console.log("user added", result);
+      res.send(result);
+    })
+
+
+
+
+
+
+
+  
+
+    
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);

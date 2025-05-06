@@ -29,7 +29,7 @@ const uri = "mongodb+srv://blogManagement:50SKYtZ4lq0nB6ev@cluster0.i6qlf.mongod
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
-    strict: true,
+    strict: false,
     deprecationErrors: true,
   }
 });
@@ -44,6 +44,8 @@ async function run() {
 
     const database = client.db("hikmahBlog");
     const blogCollection = database.collection("blogs");
+    // creating a text index for the title field in docuemnts of blogCollection
+    await blogCollection.createIndex({title:"text"})
     const wishlistCollection = database.collection("wishList");
     const userCollection = database.collection("users");
 
@@ -62,8 +64,38 @@ async function run() {
 
     })
 
-    // get APIs
+   
+    /* ************************************** */
+    /* ********** GET APIs */
+    /* ************************************** */
+    // Get all blogs
+    app.get("/allBlogs", async(req, res)=>{
+      const cursor =  blogCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
 
+    // Get blkogs by text serch or by category API
+    app.get("/blogs-by-search", async(req, res)=>{
+      const {title, category} = req.query;
+      const query = {};
+      if(title){
+        query.$text = {$search: title};
+        console.log(query);
+      }
+      else if(category){
+        query.category = category;
+        console.log(query);
+      }
+      try{
+        const cursor = blogCollection.find(query);
+        const result = await cursor.toArray();
+        res.send(result);
+      }catch(err){
+        console.error("ERROR GETTING DATA FRM MONGODB", err);
+        res.status(500).send({error:"Search Faild"});
+      }
+    });
 
 
     /* ************************************** */

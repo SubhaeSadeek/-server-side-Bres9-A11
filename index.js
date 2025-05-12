@@ -116,13 +116,11 @@ async function run() {
       const result = await blogCollection.findOne(query);
       res.send(result);
     });
-
-    // Get API for wishlist blog data
+    
+    // Get API by user email for wishlist blog data
 
     app.post("/get-wishlist", async(req, res)=>{
       const {email} = req.body;
-     
-      
       const cursor =  wishlistCollection.find({wishListUserEmail: email
       });
       const result = await cursor.toArray();      
@@ -131,6 +129,15 @@ async function run() {
 
     })
 
+    // GET API for my blog
+    app.post("/myblogs", async(req, res)=>{
+      const {email} = req.body;
+      const cursor = blogCollection.find({email:email});
+      const result = await cursor.toArray();      
+      console.log(result);
+      res.send(result);
+
+    })
 
 
     /* ************************************** */
@@ -171,11 +178,26 @@ async function run() {
       const updateDoc = { $set: req.body };
      
       const result = await blogCollection.updateOne(filter, updateDoc);
-      console.log(result);
       res.send(result);
     });
 
+    // DELETE APIs
 
+    app.delete("/wishlist/:id", async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await wishlistCollection.deleteOne(query)
+      console.log(result);
+      res.send(result)
+    })
+
+    app.delete("/my-blog/:id", async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new  ObjectId(id)};
+      const result = await blogCollection.deleteOne(query);
+      console.log(result);
+      res.send(result);
+    })
 
   
 

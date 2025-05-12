@@ -47,6 +47,7 @@ async function run() {
     // creating a text index for the title field in docuemnts of blogCollection
     await blogCollection.createIndex({title:"text"})
     const wishlistCollection = database.collection("wishList");
+    const commentsCollection = database.collection("comment")
     const userCollection = database.collection("users");
 
     // Auth related APIs
@@ -75,27 +76,61 @@ async function run() {
       res.send(result);
     })
 
-    // Get blkogs by text serch or by category API
+    // Get blogs by text serch or by category API
     app.get("/blogs-by-search", async(req, res)=>{
       const {title, category} = req.query;
       const query = {};
       if(title){
         query.$text = {$search: title};
-        console.log(query);
+        
       }
       else if(category){
         query.category = category;
-        console.log(query);
+      
       }
       try{
         const cursor = blogCollection.find(query);
         const result = await cursor.toArray();
-        res.send(result);
+        res.send(result)
+       
       }catch(err){
         console.error("ERROR GETTING DATA FRM MONGODB", err);
         res.status(500).send({error:"Search Faild"});
       }
     });
+
+    // Get blog by ID for a single blog data to show detail in frontend
+    app.get("/blogDetails/:id", async(req, res)=>{
+      const id = req.params.id;
+      
+      const query = {_id: new ObjectId(id)};
+      const result = await blogCollection.findOne(query);
+      
+      res.send(result);
+    } );
+
+    // Get API for updating a blog data
+    app.get("/update-blog/:id", async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await blogCollection.findOne(query);
+      res.send(result);
+    });
+
+    // Get API for wishlist blog data
+
+    app.post("/get-wishlist", async(req, res)=>{
+      const {email} = req.body;
+     
+      
+      const cursor =  wishlistCollection.find({wishListUserEmail: email
+      });
+      const result = await cursor.toArray();      
+      
+      res.send(result);
+
+    })
+
 
 
     /* ************************************** */
@@ -110,8 +145,13 @@ async function run() {
       res.send(result);
     });
 
-    
-    
+    // add wishlist API
+    app.post("/wishlist", async(req, res)=>{
+      const newWishlist = req.body;
+      const result = await wishlistCollection.insertOne(newWishlist);
+      res.send(result);
+    })
+
     // Add User API
     app.post("/user", async(req, res)=>{
       const user = req.body;
@@ -123,6 +163,17 @@ async function run() {
 
 
 
+    // Update blog API
+    app.patch("/update-blog/:id", async (req, res) => {
+      const id = req.params.id;
+      
+      const filter = { _id: new ObjectId(id)};
+      const updateDoc = { $set: req.body };
+     
+      const result = await blogCollection.updateOne(filter, updateDoc);
+      console.log(result);
+      res.send(result);
+    });
 
 
 

@@ -139,7 +139,7 @@ async function run() {
 
     });
 
-    // GET API for featured bkogs
+    // GET API for featured blogs
     app.get("/featured", async (req, res) => {
 	const featuredBlogs = await blogCollection.aggregate([
 		{
@@ -170,6 +170,14 @@ async function run() {
 	res.send(featuredBlogs);
 });
 
+// GET API for comments
+app.get("/show-comments/:id", async(req, res)=>{
+  const id = req.params.id;
+  const cursor = commentsCollection.find({commentForBlogId:id});
+  const result = await cursor.toArray();
+  res.send(result)
+})
+
 
 
     /* ************************************** */
@@ -189,13 +197,21 @@ async function run() {
       const newWishlist = req.body;
       const result = await wishlistCollection.insertOne(newWishlist);
       res.send(result);
+    });
+
+    // add comment API
+    app.post("/comment", async(req, res)=>{
+      const newComment = req.body;
+      const result = await commentsCollection.insertOne(newComment);
+      console.log(result);
+      res.send(result)
     })
+
 
     // Add User API
     app.post("/user", async(req, res)=>{
       const user = req.body;
       const result = await userCollection.insertOne(user);
-      console.log("user added", result);
       res.send(result);
     })
 

@@ -47,7 +47,7 @@ async function run() {
     // creating a text index for the title field in docuemnts of blogCollection
     await blogCollection.createIndex({title:"text"})
     const wishlistCollection = database.collection("wishList");
-    const commentsCollection = database.collection("comment")
+    const commentsCollection = database.collection("comments")
     const userCollection = database.collection("users");
 
     // Auth related APIs
@@ -137,7 +137,39 @@ async function run() {
       console.log(result);
       res.send(result);
 
-    })
+    });
+
+    // GET API for featured bkogs
+    app.get("/featured", async (req, res) => {
+	const featuredBlogs = await blogCollection.aggregate([
+		{
+			$addFields: {
+				wordCount: {
+					$size: {
+						$filter: {
+							input: { $split: ["$blogPost", " "] },
+							as: "word",
+							cond: { $ne: ["$$word", ""] },
+						},
+					},
+				},
+			},
+		},
+		{ $sort: { wordCount: -1 } },
+		{ $limit: 10 },
+		{ $project: {title: 1,
+    blogPost: 1,
+    image: 1,
+    shortDescription: 1,
+    category: 1,
+    wordCount: 1,
+    userName: 1,
+    email: 1} },
+	]).toArray();
+
+	res.send(featuredBlogs);
+});
+
 
 
     /* ************************************** */

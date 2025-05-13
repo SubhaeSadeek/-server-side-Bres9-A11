@@ -49,6 +49,7 @@ async function run() {
     const wishlistCollection = database.collection("wishList");
     const commentsCollection = database.collection("comments")
     const userCollection = database.collection("users");
+    const subscriberCollection = database.collection("subscriber");
 
     // Auth related APIs
     app.post("/jwt", async(req, res)=>{
@@ -241,6 +242,14 @@ app.get("/show-comments/:id", async(req, res)=>{
       const user = req.body;
       const result = await userCollection.insertOne(user);
       res.send(result);
+    });
+
+    // add subscriber email
+
+    app.post("/subscribe", async(req, res)=>{
+      const newSubscriber = req.body;
+      const result = await subscriberCollection.insertOne(newSubscriber);
+      res.send(result)
     })
 
 

@@ -74,7 +74,35 @@ async function run() {
       const cursor =  blogCollection.find();
       const result = await cursor.toArray();
       res.send(result);
-    })
+    });
+
+    // api for limit 6 pages view in home page
+    app.get('/home-card',async (req, res) => {
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 4;
+            const skip = (page - 1) * limit;
+          
+                      
+            blogCollection
+              .find({})
+              .skip(skip)
+              .limit(limit)
+              .toArray()
+              .then(blogs => {
+                blogCollection.countDocuments().then(total => {
+                  res.json({
+                    blogs,
+                    total,
+                    page,
+                    totalPages: Math.ceil(total / limit),
+                  });
+                });
+              })
+              .catch(err => {
+                console.error('Error fetching reviews:', err.message);
+                res.status(500).json({ error: 'Server error' });
+              });
+          });
 
     // Get blogs by text serch or by category API
     app.get("/blogs-by-search", async(req, res)=>{

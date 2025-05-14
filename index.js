@@ -10,7 +10,7 @@ const app = express();
 
 // adding middleware
 app.use(cors({
-  origin:["http://localhost:5173"],
+  origin:["http://localhost:5173", "https://hikmah-blog.web.app", "https://hikmah-blog.firebaseapp.com"],
   credentials: true
 }));
 app.use(express.json());
@@ -23,7 +23,7 @@ user: blogManagement
 pass: 50SKYtZ4lq0nB6ev
 */
 
-const uri = "mongodb+srv://blogManagement:50SKYtZ4lq0nB6ev@cluster0.i6qlf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const uri = `mongodb+srv://${process.env.USER_DB}:${process.env.PASS_DB}@cluster0.i6qlf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -37,10 +37,10 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // await client.db("admin").command({ ping: 1 });
+    // console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
     const database = client.db("hikmahBlog");
     const blogCollection = database.collection("blogs");
@@ -58,8 +58,8 @@ async function run() {
       res
       .cookie("jwtToken", token, {
         httpOnly: true,
-        secure: false,
-        sameSite: "none",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
 
       })
       .send(token);
